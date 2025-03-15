@@ -5,6 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -77,6 +79,44 @@ public class HttpMessageParser {
         }
         // store the parsed request header info in the request object
         request.setHeaders(headers);
+    }
+
+    /**
+     * parse the text of the request according to the HTTP protocol annotation
+     *
+     * @param reader    input stream reader used to read data in the request
+     * @param request   request object representing http request
+     * @throws IOException thrown when an I/O error occurs
+     */
+    private static void decodeRequestMessage(BufferedReader reader, Request request) throws IOException {
+        int contentLen = Integer.parseInt(request.getHeaders().getOrDefault("Content-Length", "0"));
+
+        if (contentLen == 0) {
+            return;
+        }
+        char[] message = new char[contentLen];
+        reader.read(message);
+        request.setMessage(new String(message));
+    }
+
+    /**
+     * http request can be divided into 3 parts
+     *
+     * 1. request line
+     * 2. request header represented by an empty line
+     * 3. request body
+     *
+     * @param reqStream
+     * @return
+     * @throws IOException
+     */
+    public static Request parse2request(InputStream reqStream) throws IOException {
+        BufferedReader httpReader = new BufferedReader(new InputStreamReader(reqStream, "UTF-8"));
+        Request httpRequest = new Request();
+        decodeRequestLine(httpReader, httpRequest);
+        decodeRequestHeader(httpReader, httpRequest);
+        decodeRequestMessage(httpReader, httpRequest);
+        return httpRequest;
     }
 }
 
