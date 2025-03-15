@@ -1,5 +1,6 @@
 package dev.thesarfo;
 
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -27,7 +28,7 @@ public class BasicHttpServer {
     /**
      * Starts the HTTP server and initializes the thread pool for handling requests.
      */
-    static void startHttpServer() {
+    public static void startHttpServer() {
         int nThreads = Runtime.getRuntime().availableProcessors();
         taskExecutor =
                 new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(100),

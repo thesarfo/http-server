@@ -36,10 +36,24 @@ public class HttpTask implements Runnable {
             PrintWriter out = new PrintWriter(outputStream);
 
             HttpMessageParser.Request httpRequest = HttpMessageParser.parse2request(socket.getInputStream());
+            System.out.println("=== HTTP REQUEST ===");
+            System.out.println("Method: " + httpRequest.getMethod());
+            System.out.println("URI: " + httpRequest.getUri());
+            System.out.println("Version: " + httpRequest.getVersion());
+            System.out.println("Headers: " + httpRequest.getHeaders());
+            System.out.println("Message: " + httpRequest.getMessage());
+            System.out.println("====================================");
+
 
             try {
-                String result = null;
+                String result = "default response";
                 String httpRes = HttpMessageParser.buildResponse(httpRequest, result);
+
+                System.out.println("=== HTTP RESPONSE ===");
+                System.out.println("Status: " + httpRequest.getVersion() + " 200 ok");
+                System.out.println("Headers: Content-Type: application/json, Content-Length: " + result.getBytes().length);
+                System.out.println("Body: " + result);
+                System.out.println("=====================");
 
                 out.print(httpRes);
             } catch (Exception e) {

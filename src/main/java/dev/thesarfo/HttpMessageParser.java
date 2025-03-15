@@ -164,7 +164,7 @@ public class HttpMessageParser {
      */
     private static void buildResponseLine(Response response, StringBuilder stringBuilder) {
         stringBuilder.append(response.getVersion()).append(" ").append(response.getCode()).append(" ")
-                .append(response.getStatus()).append("\n");
+                .append(response.getStatus()).append("\r\n");
     }
 
     /**
@@ -176,7 +176,7 @@ public class HttpMessageParser {
         for (Map.Entry<String, String> entry : response.getHeaders().entrySet()) {
             stringBuilder.append(entry.getKey()).append(":").append(entry.getValue()).append("\n");
         }
-        stringBuilder.append("\n");
+        stringBuilder.append("\r\n");
     }
 
     /**
