@@ -13,30 +13,30 @@ import java.util.Map;
 public class HttpMessageParser {
 
     @Data
-    public static class Request{
+    public static class Request {
 
         /*
-        * method of the request e.g. GET, POST, PUT, DELETE
+         * method of the request e.g. GET, POST, PUT, DELETE
          */
         private String method;
 
         /*
-        * requested URI
+         * requested URI
          */
         private String uri;
 
         /*
-        * version of the HTTP protocol
+         * version of the HTTP protocol
          */
         private String version;
 
         /*
-        * request headers
+         * request headers
          */
         private Map<String, String> headers;
 
         /*
-        * request parameters
+         * request parameters
          */
         private String message;
     }
@@ -58,7 +58,7 @@ public class HttpMessageParser {
     /**
      * Parses request headers according to the HTTP protocol
      *
-     * @param reader BufferedReader object that reads request headers
+     * @param reader  BufferedReader object that reads request headers
      * @param request request object that stores request information
      * @throws IOException thrown when an error occurs while reading the request headers
      */
@@ -70,7 +70,7 @@ public class HttpMessageParser {
         String line = reader.readLine();
         String[] kv;
 
-        while(!"".equals(line)){
+        while (!"".equals(line)) {
             // separate each line of the request by colons and store the keys and values in a map
             kv = StringUtils.split(line, ":");
             assert kv.length == 2;
@@ -84,8 +84,8 @@ public class HttpMessageParser {
     /**
      * parse the text of the request according to the HTTP protocol annotation
      *
-     * @param reader    input stream reader used to read data in the request
-     * @param request   request object representing http request
+     * @param reader  input stream reader used to read data in the request
+     * @param request request object representing http request
      * @throws IOException thrown when an I/O error occurs
      */
     private static void decodeRequestMessage(BufferedReader reader, Request request) throws IOException {
@@ -101,7 +101,7 @@ public class HttpMessageParser {
 
     /**
      * http request can be divided into 3 parts
-     *
+     * <p>
      * 1. request line
      * 2. request header represented by an empty line
      * 3. request body
@@ -118,5 +118,73 @@ public class HttpMessageParser {
         decodeRequestMessage(httpReader, httpRequest);
         return httpRequest;
     }
-}
 
+    @Data
+    public static class Response {
+        private String version;
+        private int code;
+        private String status;
+        private Map<String, String> headers;
+        private String message;
+
+    }
+
+    /**
+     * constructs the http response based on the given request object and response string
+     *
+     * @param request  request object used to construct the response
+     * @param response response string
+     * @return a string representing the http response
+     */
+    public static String buildResponse(Request request, String response) {
+        Response httpResponse = new Response();
+        httpResponse.setCode(200);
+        httpResponse.setStatus("ok");
+        httpResponse.setVersion(request.getVersion());
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Content-Length", String.valueOf(response.getBytes().length));
+        httpResponse.setHeaders(headers);
+
+        httpResponse.setMessage(response);
+
+        StringBuilder builder = new StringBuilder();
+        buildResponseLine(httpResponse, builder);
+        buildResponseHeaders(httpResponse, builder);
+        buildResponseMessage(httpResponse, builder);
+        return builder.toString();
+    }
+
+    /**
+     * build response line, including the version, status code, and status information
+     *
+     * @param response      response object used to build response rows
+     * @param stringBuilder object used to concatenate response string
+     */
+    private static void buildResponseLine(Response response, StringBuilder stringBuilder) {
+        stringBuilder.append(response.getVersion()).append(" ").append(response.getCode()).append(" ")
+                .append(response.getStatus()).append("\n");
+    }
+
+    /**
+     * build response headers, including the content type and content length
+     * @param response     response object used to build response body
+     * @param stringBuilder object used to concatenate response string
+     */
+    private static void buildResponseHeaders(Response response, StringBuilder stringBuilder) {
+        for (Map.Entry<String, String> entry : response.getHeaders().entrySet()) {
+            stringBuilder.append(entry.getKey()).append(":").append(entry.getValue()).append("\n");
+        }
+        stringBuilder.append("\n");
+    }
+
+    /**
+     * build response body
+     * @param response     response object used to build response body
+     * @param stringBuilder object used to concatenate response string
+     */
+    private static void buildResponseMessage(Response response, StringBuilder stringBuilder) {
+        stringBuilder.append(response.getMessage());
+    }
+}
